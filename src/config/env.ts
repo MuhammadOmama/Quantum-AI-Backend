@@ -20,7 +20,14 @@ const envSchema = z.object({
   GROQ_MAX_COMPLETION_TOKENS: z.coerce.number().default(4096),
   JWT_SECRET: z.string().min(16, 'JWT_SECRET must be at least 16 characters'),
   JWT_ISSUER: z.string().default('quantum-ai'),
-  QUANTUM_AI_SERVICE_SECRET: z.string().min(32).optional(),
+  // Shared with QuantumChat-Backend for signing AI response receipts.
+  // Empty strings (e.g. unset CI secrets) are treated as missing.
+  QUANTUM_AI_SERVICE_SECRET: z.preprocess(
+    (v) => (v === '' || v === undefined ? undefined : v),
+    z
+      .string({ required_error: 'Required' })
+      .min(32, 'QUANTUM_AI_SERVICE_SECRET must be at least 32 characters')
+  ),
   AUTH_REQUIRED: z
     .string()
     .transform((v) => v === 'true')
@@ -74,7 +81,7 @@ const fallback = {
   GROQ_MAX_COMPLETION_TOKENS: 4096,
   JWT_SECRET: process.env.JWT_SECRET ?? 'vercel-build-placeholder-secret',
   JWT_ISSUER: 'quantum-ai',
-  QUANTUM_AI_SERVICE_SECRET: undefined as string | undefined,
+  QUANTUM_AI_SERVICE_SECRET: process.env.QUANTUM_AI_SERVICE_SECRET || 'vercel-build-placeholder-service-secret',
   AUTH_REQUIRED: false,
   STORAGE_PROVIDER: 'local' as const,
   UPLOAD_DIR: './uploads',
