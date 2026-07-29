@@ -32,7 +32,9 @@ const envSchema = z.object({
     .string()
     .transform((v) => v === 'true')
     .default('false'),
-  STORAGE_PROVIDER: z.enum(['local', 'google-drive']).default('local'),
+  // local = disk (dev only); mongodb = GridFS (recommended on Vercel);
+  // google-drive = optional remote Drive folder.
+  STORAGE_PROVIDER: z.enum(['local', 'google-drive', 'mongodb']).default('local'),
   UPLOAD_DIR: z.string().default('./uploads'),
   GOOGLE_DRIVE_FOLDER_ID: z.string().optional(),
   GOOGLE_SERVICE_ACCOUNT_EMAIL: z.string().email().optional(),
@@ -83,7 +85,7 @@ const fallback = {
   JWT_ISSUER: 'quantum-ai',
   QUANTUM_AI_SERVICE_SECRET: process.env.QUANTUM_AI_SERVICE_SECRET || 'vercel-build-placeholder-service-secret',
   AUTH_REQUIRED: false,
-  STORAGE_PROVIDER: 'local' as const,
+  STORAGE_PROVIDER: (process.env.VERCEL ? 'mongodb' : 'local') as 'local' | 'mongodb',
   UPLOAD_DIR: './uploads',
   GOOGLE_DRIVE_FOLDER_ID: undefined as string | undefined,
   GOOGLE_SERVICE_ACCOUNT_EMAIL: undefined as string | undefined,
