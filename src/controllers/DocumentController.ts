@@ -193,7 +193,7 @@ export class DocumentController {
         : format === 'text' ? 'txt'
         : format;
 
-      const { blob, filename, from, to } = await formatConverterService.convertText(text, sdkFormat);
+      const { blob, filename } = await formatConverterService.convertText(text, sdkFormat);
       const arrayBuffer = await blob.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
